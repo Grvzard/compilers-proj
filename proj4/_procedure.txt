@@ -1,0 +1,47 @@
+-- grammar
+expr: expr '+' expr_2 | expr '-' expr_2 | expr_2
+expr_2: expr_2 '*' expr_3 | expr_2 '/' expr_3 | expr_3
+expr_3: '(' expr ')' | NUMBER
+
+
+-- FIRSTVT() and LASTVT()
+FIRSTVT(expr_3) = {(, NUMBER}
+FIRSTVT(expr_2) = {*, /, (, NUMBER}
+FIRSTVT(expr): {+, -, *, /, (, NUMBER}
+LASTVT(expr_3) = {), NUMBER}
+LASTVT(expr_2) = {*, /, ), NUMBER}
+LASTVT(expr): {+, -, *, /, ), NUMBER}
+
+
+-- intermediates
+obtained from expr:
+    + < {*, /, (, NUMBER}
+    - < {*, /, (, NUMBER}
+    {+, -, *, /, ), NUMBER} > +
+    {+, -, *, /, ), NUMBER} > -
+obtained from expr_2:
+    * < {(, NUMBER}
+    / < {(, NUMBER}
+    {*, /, ), NUMBER} > *
+    {*, /, ), NUMBER} > /
+obtained from expr_3:
+    ( < {+, -, *, /, (, NUMBER}
+    {+, -, *, /, ), NUMBER} > )
+obtained from definitions:
+    # < {+, -, *, /, (, NUMBER}
+    {+, -, *, /, ), NUMBER} > #
+
+
+-- summarized in a table ('n' stands for NUMBER)
++---+---+---+---+---+---+---+---+---+
+|   | + | - | * | / | ( | ) | n | # |
++---+---+---+---+---+---+---+---+---+
+| + | > | > | < | < | < | > | < | > |
+| - | > | > | < | < | < | > | < | > |
+| * | > | > | > | > | < | > | < | > |
+| / | > | > | > | > | < | > | < | > |
+| ( | < | < | < | < | < | = | < |   |
+| ) | > | > | > | > |   | > |   | > |
+| n | > | > | > | > |   | > |   | > |
+| # | < | < | < | < | < |   | < | = |
++---+---+---+---+---+---+---+---+---+

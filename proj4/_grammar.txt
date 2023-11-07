@@ -1,0 +1,5 @@
+expr: expr '+' expr_2 | expr '-' expr_2 | expr_2
+expr_2: expr_2 '*' expr_3 | expr_2 '/' expr_3 | expr_3
+expr_3: '(' expr ')' | NUMBER
+
+NUMBER: /-?\d+(\.\d+)?/
