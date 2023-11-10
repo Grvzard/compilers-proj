@@ -59,7 +59,7 @@ let compare =
 
 type symbol =
   | Term of Token.t
-  | Nonterm of Rpn.ast
+  | Nonterm of Rpn.opcodes
 
 type analysis_stack =
   { stack : symbol Stack.t
@@ -94,7 +94,10 @@ let reduce cmp_token stack =
     ignore (Stack.pop stack.op_stack);
     let s1 = Stack.pop stack.stack in
     match s1 with
-    | Term (Token.Number n) -> Stack.push (Nonterm (Rpn.NodeNumber n)) stack.stack
+    | Term (Token.Number n) ->
+      let new_q = Queue.create () in
+      Queue.push (Rpn.OpNumber n) new_q;
+      Stack.push (Nonterm new_q) stack.stack
     | Term Token.RParen ->
       let s2 = Stack.pop stack.stack in
       let s3 = Stack.pop stack.stack in
@@ -104,18 +107,20 @@ let reduce cmp_token stack =
          (* pop '(' *)
          ignore (Stack.pop stack.op_stack)
        | _ -> raise (Failure "reduce failed"))
-    | Nonterm tree_r ->
+    | Nonterm codes_r ->
       let s2 = Stack.pop stack.stack in
       let s3 = Stack.pop stack.stack in
       (match s2, s3 with
-       | Term Token.Plus, Nonterm tree_l ->
-         Stack.push (Nonterm (Rpn.NodePlus (tree_l, tree_r))) stack.stack
-       | Term Token.Minus, Nonterm tree_l ->
-         Stack.push (Nonterm (Rpn.NodeMinus (tree_l, tree_r))) stack.stack
-       | Term Token.Multiply, Nonterm tree_l ->
-         Stack.push (Nonterm (Rpn.NodeMultiply (tree_l, tree_r))) stack.stack
-       | Term Token.Divide, Nonterm tree_l ->
-         Stack.push (Nonterm (Rpn.NodeDivide (tree_l, tree_r))) stack.stack
+       | ( Term ((Token.Plus | Token.Minus | Token.Multiply | Token.Divide) as token_)
+         , Nonterm codes_l ) ->
+         Queue.transfer codes_r codes_l;
+         Stack.push s3 stack.stack;
+         (match token_ with
+          | Token.Plus -> Queue.push Rpn.OpPlus codes_l
+          | Token.Minus -> Queue.push Rpn.OpMinus codes_l
+          | Token.Multiply -> Queue.push Rpn.OpMultiply codes_l
+          | Token.Divide -> Queue.push Rpn.OpDivide codes_l
+          | _ -> assert false)
        | _ -> raise (Failure "reduce failed"))
     | _ -> raise (Failure "reduce failed")
   done
@@ -152,7 +157,7 @@ let tokens_to_rpn tokens =
         inner stack tokens)
     else (
       match Stack.pop stack.stack with
-      | Nonterm tree_ -> tree_
+      | Nonterm rpn -> rpn
       | _ ->
         print_string "stack traceback: ";
         stack_traceback stack;

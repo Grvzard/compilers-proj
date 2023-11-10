@@ -16,8 +16,10 @@ let () =
   let tokens = Queue.create () in
   lex lexbuf tokens;
   try
-    let rpn_ast = Parser.tokens_to_rpn tokens in
-    match Rpn.eval_ast rpn_ast with
+    let rpn = Parser.tokens_to_rpn tokens in
+    print_string "rpn: ";
+    print_endline (Rpn.codes_to_string rpn);
+    match Rpn.eval_opcodes rpn with
     | result -> print_endline (string_of_float result)
   with
   | Failure e -> print_endline e
