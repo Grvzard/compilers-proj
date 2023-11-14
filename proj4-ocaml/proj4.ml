@@ -11,7 +11,7 @@ let rec lex lexbuf tokens =
 let () =
   print_string "> ";
   flush stdout;
-  (* let lexbuf = Lexing.from_string "(2+4)*0#" in *)
+  (* let lexbuf = Lexing.from_string "(0+0*0)/((-1)-0)" in *)
   let lexbuf = Lexing.from_channel stdin in
   let tokens = Queue.create () in
   lex lexbuf tokens;
