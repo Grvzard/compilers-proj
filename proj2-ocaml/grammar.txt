@@ -1,0 +1,14 @@
+E -> T G
+
+G -> + T G
+G -> - T G
+G -> e
+
+T -> F S
+
+S -> * F S
+S -> / F S
+S -> e
+
+F -> ( E )
+F -> i
