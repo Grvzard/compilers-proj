@@ -61,12 +61,12 @@ value_t popleftValueArray(ValueArray *array) {
     return array->values[array->count + 1];
 }
 
-value_t peakValueArray(ValueArray *array) {
+value_t peekValueArray(ValueArray *array) {
     assert(array->count != 0);
     return array->values[array->count - 1];
 }
 
-value_t peakleftValueArray(ValueArray *array) {
+value_t peekleftValueArray(ValueArray *array) {
     assert(array->count != 0);
     return array->values[0];
 }

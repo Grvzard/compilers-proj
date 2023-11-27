@@ -77,8 +77,8 @@ void parse(const char *src) {
                 err = 1;
                 break;
             }
-            const Symbol *left = peakValueArray(&proc_stack);
-            const Symbol *right = peakleftValueArray(&token_queue);
+            const Symbol *left = peekValueArray(&proc_stack);
+            const Symbol *right = peekleftValueArray(&token_queue);
             if (left->type == STYPE_NONTERM) {
                 // 推导
                 const ParsingRule *rule = &kParsingTable[left->ns][right->ts];
@@ -110,7 +110,7 @@ void parse(const char *src) {
         } else {
             // proc_stack.count == 1
             if (token_queue.count != 1 ||
-                peakValueArray(&token_queue)->ts != SYM_END) {
+                peekValueArray(&token_queue)->ts != SYM_END) {
                 fprintf(stderr, "parse failed.\n");
                 err = 1;
                 break;

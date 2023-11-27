@@ -16,7 +16,7 @@ void writeValueArray(ValueArray *array, value_t value);
 void freeValueArray(ValueArray *array);
 value_t popValueArray(ValueArray *array);
 value_t popleftValueArray(ValueArray *array);
-value_t peakValueArray(ValueArray *array);
-value_t peakleftValueArray(ValueArray *array);
+value_t peekValueArray(ValueArray *array);
+value_t peekleftValueArray(ValueArray *array);
 
 #endif  // _array_h_
