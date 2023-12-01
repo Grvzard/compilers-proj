@@ -1,5 +1,4 @@
-module ParsingTbl = Grammar.Parsing.ParsingTbl
-module Production = Grammar.Parsing.Production
+module Production = Grammar.Production
 
 module ProcessStack = struct
   type sym =
@@ -36,12 +35,16 @@ let print_stack rounds proc_stack tokens action prod_str =
   print_newline ()
 ;;
 
-let do_parse (parsing_tbl : ParsingTbl.t) (tokens : Token.container_t) =
+let do_parse
+  (grammar : Grammar.t)
+  (parsing_tbl : Parsingtbl.t)
+  (tokens : Token.container_t)
+  =
   let err = ref false in
   let rounds = ref 1 in
   let proc_stack : ProcessStack.t = Stack.create () in
   Stack.push (`Term '#') proc_stack;
-  Stack.push (`Nonterm "E") proc_stack;
+  Stack.push (`Nonterm grammar.s) proc_stack;
   let inner () =
     (* Stack.length >= 1 *)
     match Stack.length proc_stack with
@@ -60,10 +63,10 @@ let do_parse (parsing_tbl : ParsingTbl.t) (tokens : Token.container_t) =
           | Some prod ->
             print_stack !rounds proc_stack tokens "推导" (Production.to_string prod);
             ignore (Stack.pop proc_stack);
-            prod.rhs
-            |> Either.map_left (fun l ->
-              l |> List.rev |> List.iter (fun sym -> Stack.push sym proc_stack))
-            |> ignore
+            (match prod.rhs with
+             | `Symbols l ->
+               l |> List.rev |> List.iter (fun sym -> Stack.push sym proc_stack)
+             | `Epsilon -> ())
           | None -> raise (Failure "parse failed when fetching parsing rule."))
        | `Term t ->
          let right = Token.take tokens in
@@ -81,8 +84,12 @@ let do_parse (parsing_tbl : ParsingTbl.t) (tokens : Token.container_t) =
 ;;
 
 let repl () =
-  (* let lexbuf = Lexing.from_channel stdin in *)
-  let lexbuf = Lexing.from_string "(i+i*i)/(i-i)" in
+  let grammar = Grammar.from_file "grammar.txt" in
+  let parsing_tbl = grammar |> Parsingtbl.generate in
+  print_string "> ";
+  flush stdout;
+  let lexbuf = Lexing.from_channel stdin in
+  (* let lexbuf = Lexing.from_string "(i+i*i)/(i-i)" in *)
   let tokens = Token.new_container () in
   let rec lex lexbuf tokens =
     match Lexer.tokenize lexbuf with
@@ -92,8 +99,7 @@ let repl () =
       if t = `End then () else lex lexbuf tokens
   in
   lex lexbuf tokens;
-  let parsing_tbl = Grammar.Parsing.from_file "grammar.txt" in
-  do_parse parsing_tbl tokens
+  do_parse grammar parsing_tbl tokens
 ;;
 
 let () = repl ()
