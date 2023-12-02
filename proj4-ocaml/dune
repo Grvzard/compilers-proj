@@ -1,1 +1,5 @@
-(executable (name proj4))
+(ocamllex lexer)
+
+(executable
+ (name proj4)
+ (libraries grammar))

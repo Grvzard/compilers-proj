@@ -1,20 +1,10 @@
 type t =
-  | Plus
-  | Minus
-  | Multiply
-  | Divide
-  | LParen
-  | RParen
+  | Op of string
   | Number of float
   | End
 
 let to_string = function
-  | Plus -> "+"
-  | Minus -> "-"
-  | Multiply -> "*"
-  | Divide -> "/"
-  | LParen -> "("
-  | RParen -> ")"
+  | Op op -> op
   | Number n -> string_of_float n
   | End -> "#"
 ;;
