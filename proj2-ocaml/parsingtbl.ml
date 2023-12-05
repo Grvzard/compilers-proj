@@ -62,7 +62,7 @@ module Gen = struct
 
   let calc_follow (gen : t) lhs rhs prev_changes =
     match rhs with
-    | `Epsilon -> false
+    | `Epsilon -> prev_changes
     | `Symbols l ->
       let changed = ref false in
       None
